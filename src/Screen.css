@@ -1,0 +1,10 @@
+.row {
+  flex-direction: row;
+  display: inline-flex;
+  text-align: center;
+  align-items: center;
+  padding: 2%;
+}
+.textField{
+  margin-left: 2ch;
+}
