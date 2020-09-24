@@ -1,6 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import TextField from "@material-ui/core/TextField";
-import { makeStyles } from "@material-ui/core/styles";
 
 import Radio from "@material-ui/core/Radio";
 import RadioGroup from "@material-ui/core/RadioGroup";
@@ -14,21 +13,32 @@ import Api from "./api";
 
 export default function FormPropsTextFields() {
   const [isValid, setIsValid] = useState(true);
-  const [valueField, setValueField] = React.useState();
-  const [search, setSearch] = React.useState();
+  const [valueField, setValueField] = useState();
+  const [search, setSearch] = useState();
+  const [result, setResult] = useState([]);
+  const [err, setErr] = useState();
 
   const handleChange = (event) => {
     setValueField(event.target.value);
     setIsValid(false);
   };
   const handleChangeText = (event) => {
-    setSearch(event.target.value)
+    setSearch(event.target.value);
   };
-  
+
+  const handleClik = () => {
+    Api.get(`?type=${valueField}&apikey=7e35354&s=${search}&page=${3}`)
+      .then((res) => {
+        setResult(res.data.Search);
+        console.log(res.data.Search);
+        res.data.Error ? setErr(res.data.Error) : setErr("");
+      })
+      .catch((err) => {});
+  };
   return (
     <div className="container">
       <div className="row">
-      <FormControl component="fieldset">
+        <FormControl component="fieldset">
           <RadioGroup name="select" onChange={handleChange}>
             <FormLabel component="legend">what do you want to watch?</FormLabel>
             <div>
@@ -38,7 +48,7 @@ export default function FormPropsTextFields() {
                 label="Movies"
               />
               <FormControlLabel
-                value="serie"
+                value="series"
                 control={<Radio />}
                 label="Serie"
               />
@@ -59,11 +69,28 @@ export default function FormPropsTextFields() {
       </div>
 
       <div className="button">
-        <Button variant="contained" color="secondary" disabled={isValid}>
+        <Button
+          onClick={handleClik}
+          variant="contained"
+          color="secondary"
+          disabled={isValid}
+        >
           Search
         </Button>
       </div>
 
+      <div>
+        <h1>Listar os Filmes</h1>
+        {result &&
+          result.map((iten, index) => (
+            <div>
+              <h2 key={index}>
+                Title: {iten.Title}, Year: {iten.Year}.
+              </h2>
+              <button>View Details</button>
+            </div>
+          ))}
+      </div>
     </div>
   );
 }
