@@ -10,6 +10,7 @@ import Button from "@material-ui/core/Button";
 
 import "./Screen.css";
 import Api from "./api";
+import Card from "./components/Card";
 
 export default function FormPropsTextFields() {
   const [isValid, setIsValid] = useState(true);
@@ -18,23 +19,34 @@ export default function FormPropsTextFields() {
   const [result, setResult] = useState([]);
   const [err, setErr] = useState();
 
+  const [numberPag, setNumberPag] = useState();
+  const [count, setCount] = useState(1);
+
   const handleChange = (event) => {
     setValueField(event.target.value);
-    setIsValid(false);
   };
   const handleChangeText = (event) => {
     setSearch(event.target.value);
+    setIsValid(false);
   };
-
   const handleClik = () => {
-    Api.get(`?type=${valueField}&apikey=7e35354&s=${search}&page=${3}`)
+    Api.get(`?type=${valueField}&apikey=7e35354&s=${search}&page=${count}`)
       .then((res) => {
         setResult(res.data.Search);
-        console.log(res.data.Search);
+        setNumberPag(res.data.totalResults);
+        setCount(count);
         res.data.Error ? setErr(res.data.Error) : setErr("");
       })
-      .catch((err) => {});
+      .catch((err) => {
+      });
   };
+  const reset = () =>{
+    window.location.reload()
+  }
+  useEffect(() => {
+    handleClik(count);
+  }, [count]);
+
   return (
     <div className="container">
       <div className="row">
@@ -77,20 +89,48 @@ export default function FormPropsTextFields() {
         >
           Search
         </Button>
+        <Button
+          onClick={reset}
+          variant="contained"
+          color="primary"
+          disabled={isValid}
+        >
+          Reset
+        </Button>
       </div>
 
       <div>
-        <h1>Listar os Filmes</h1>
         {result &&
-          result.map((iten, index) => (
-            <div>
-              <h2 key={index}>
-                Title: {iten.Title}, Year: {iten.Year}.
-              </h2>
-              <button>View Details</button>
-            </div>
-          ))}
+          result.map((iten, index) => <Card iten={iten} key={index} />)}
       </div>
+      <div className="numberPage">
+        {numberPag && (
+          <div className="button">
+            <p>
+              pag {count} of {numberPag}
+            </p>
+            <Button
+              id="decrement"
+              onClick={() => setCount(count - 1)}
+              variant="contained"
+              color="primary"
+              disabled={isValid}
+            >
+              Prev Page
+            </Button>
+            <Button
+              id="increment"
+              onClick={() => setCount(count + 1)}
+              variant="contained"
+              color="primary"
+              disabled={isValid}
+            >
+              Next Page
+            </Button>
+          </div>
+        )}
+      </div>
+        <p>{err}</p>
     </div>
   );
 }
